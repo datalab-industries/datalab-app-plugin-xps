@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+data/*.zip
+data/coin_cell_dataset
+
 # C extensions
 *.so
 
