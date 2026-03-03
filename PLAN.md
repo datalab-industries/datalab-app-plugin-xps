@@ -172,6 +172,16 @@ on asynchronous block processing is underway and expected to land imminently
 (days/weeks). The blocks developed here should be designed to slot into that
 async processing infrastructure once available.
 
+## Beyond Batch Ingestion: Real-time Data Capture
+
+The ingestion scripts (§1) address the initial backlog of ~250 coin cells. Going
+forward, data should flow into datalab automatically as it is acquired. The
+planned `datalab-beholder-plugin` will monitor folders on instrument PCs and
+upload new files to datalab in real time. This means the blocks developed here
+need to handle files appearing incrementally (not just as a one-off batch), and
+the async processing infrastructure becomes essential for processing uploads as
+they arrive.
+
 ## Dependencies
 
 The plugin currently has no runtime dependencies. New dependencies to add:
