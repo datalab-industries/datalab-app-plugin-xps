@@ -24,7 +24,11 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "lmfit>=1.3",
+    "numpy",
+    "vgd-reader",
+]
 
 [project.urls]
 homepage = "https://datalab-industries.github.io/datalab-app-plugin-digibat/"
@@ -34,7 +38,7 @@ changelog = "https://github.com/datalab-industries/datalab-app-plugin-digibat/CH
 
 # Edit this entry point with any block classes implemented in this plugin
 [project.entry-points.'pydatalab.apps.plugins']
-example = "datalab_app_plugin_digibat.blocks:ExampleDataBlock"
+xps = "datalab_app_plugin_digibat.blocks:XPSBlock"
 
 [tool.setuptools.packages.find]
 where = ["src"]
