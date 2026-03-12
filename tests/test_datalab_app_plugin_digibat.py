@@ -1,5 +1,4 @@
-from datalab_app_plugin_digibat import __version__
-from datalab_app_plugin_digibat.blocks import XPSBlock
+from datalab_app_plugin_digibat import XPSBlock, __version__
 
 
 def test_version():
