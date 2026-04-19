@@ -40,6 +40,9 @@ changelog = "https://github.com/datalab-industries/datalab-app-plugin-digibat/CH
 [project.entry-points.'pydatalab.apps.plugins']
 xps = "datalab_app_plugin_digibat.xps.blocks:XPSBlock"
 
+[tool.setuptools_scm]
+version_scheme = "post-release"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 namespaces = true
