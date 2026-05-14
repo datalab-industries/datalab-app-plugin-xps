@@ -26,7 +26,7 @@ class XPSBlock(DataBlock):
 
     defaults = {
         "num_peaks": 3,
-        "peak_centers": "284, 286, 290",
+        "peak_centers": "",
         "run_fit": False,
     }
 
@@ -98,7 +98,7 @@ class XPSBlock(DataBlock):
         if len(centers) < num_peaks:
             extra = np.linspace(x.min(), x.max(), num_peaks - len(centers) + 2)[1:-1]
             centers = centers + list(extra[: num_peaks - len(centers)])
-        centers = centers[:num_peaks]
+        num_peaks = len(centers)
 
         # --- Voigt peak fitting (only when explicitly requested) ---
         fit_result = None
