@@ -1,6 +1,6 @@
-site_name: "datalab-app-plugin-digibat"
-site_description: Documentation for datalab-app-plugin-digibat.
-site_url: "https://datalab-industries.github.io/datalab-app-plugin-digibat"
+site_name: "datalab-app-plugin-xps"
+site_description: Documentation for datalab-app-plugin-xps.
+site_url: "https://datalab-industries.github.io/datalab-app-plugin-xps"
 
 theme:
   name: material
@@ -35,8 +35,8 @@ theme:
   features:
     - content.tabs.link
 
-repo_name: "datalab-industries/datalab-app-plugin-digibat"
-repo_url: "https://github.com/datalab-industries/datalab-app-plugin-digibat"
+repo_name: "datalab-industries/datalab-app-plugin-xps"
+repo_url: "https://github.com/datalab-industries/datalab-app-plugin-xps"
 
 docs_dir: "docs"
 

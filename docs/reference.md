@@ -1,3 +1,3 @@
 # Reference
 
-::: datalab_app_plugin_digibat
+::: datalab_app_plugin_xps

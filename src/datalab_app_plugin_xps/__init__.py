@@ -1,4 +1,4 @@
-"""Additional datalab functionality for the DIGIBAT lab at Imperial College London."""
+"""Additional datalab XPS functionality developed for the DIGIBAT lab at Imperial College London."""
 
 from ._version import __version__
 from .xps.blocks import XPSBlock

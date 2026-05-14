@@ -9,8 +9,8 @@ from bokeh.models import Button, CustomJS, Div, TextInput
 from pydatalab.blocks.base import DataBlock, event, generate_js_callback_single_float_parameter
 from pydatalab.bokeh_plots import DATALAB_BOKEH_THEME
 
-from datalab_app_plugin_digibat._version import __version__
-from datalab_app_plugin_digibat.xps.utils import shirley_background
+from datalab_app_plugin_xps._version import __version__
+from datalab_app_plugin_xps.xps.utils import shirley_background
 
 
 class XPSBlock(DataBlock):

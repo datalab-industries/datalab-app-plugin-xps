@@ -1,15 +1,15 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: v0.2.0
+_commit: v0.2.2
 _src_path: git@github.com:datalab-org/datalab-app-plugin-template
 author_email: dev@datalab.industries
-author_fullname: Matthew Evans
+author_fullname: datalab industries development team
 copyright_date: '2026'
 copyright_holder: datalab industries ltd.
 copyright_holder_email: dev@datalab.industries
-package_name: datalab_app_plugin_digibat
-project_name: datalab-app-plugin-digibat
-repository_name: datalab-app-plugin-digibat
+package_name: datalab_app_plugin_xps
+project_name: datalab-app-plugin-xps
+repository_name: datalab-app-plugin-xps
 repository_namespace: datalab-industries
-short_description: Additional datalab functionality for the DIGIBAT lab at Imperial
-    College London.
+short_description: XPS functionality developed for the DIGIBAT lab at Imperial College
+    London.
 
