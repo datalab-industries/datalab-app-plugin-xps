@@ -1,12 +1,15 @@
-from datalab_app_plugin_xps import XPSBlock, __version__
+from pathlib import Path
 
 import pytest
-from pathlib import Path
+
+from datalab_app_plugin_xps import XPSBlock, __version__
+
 
 @pytest.fixture
 def example_files(tmp_path):
     data_path = Path(__file__).parent / "data" / "In-718"
     return list(data_path.glob("*.VGD"))
+
 
 def test_version():
     assert __version__
