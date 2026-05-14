@@ -19,9 +19,13 @@ class XPSBlock(DataBlock):
     version = __version__
     blocktype: str = "xps"
     name: str = "XPS Block"
-    description: str = (
-        "A block that loads an XPS .VGD file, subtracts a Shirley background, and fits Voigt peaks."
-    )
+    description: str = """
+A block that loads XPS .VGD files from Thermo Scientific.
+The block can subtract a Shirley background,
+and fit Voigt peaks in the case of single XPS spectra.
+
+Uses the `vgd-reader` Python package: https://github.com/gkerherve/vgd_reader.
+"""
     accepted_file_extensions = (".VGD", ".vgd")
 
     defaults = {
@@ -35,7 +39,7 @@ class XPSBlock(DataBlock):
 
     @property
     def plot_functions(self):
-        return (self.plot_XPS,)
+        return (self.plot_xps,)
 
     @event()
     def set_num_peaks(self, num_peaks: str):
@@ -65,13 +69,23 @@ class XPSBlock(DataBlock):
         """Enable peak fitting on next plot render (called by the Fit button)."""
         self.data["run_fit"] = True
 
-    def _make_subfigure(self, filename: Path, plot_title: str = None, run_fit: bool = False):
+    def _make_subfigure(self, filename: Path, plot_title: str | None = None, run_fit: bool = False):
         background_subtraction = True
 
         if "XPS_Survey" in filename.name:
             background_subtraction = False
 
         data = read_vgd(filename)
+
+        metadata = {
+            "source_energy_eV": data.acquisition.source_energy,
+            "core_level": data.core_level,
+            "pass_energy_eV": data.acquisition.pass_energy,
+        }
+
+        if plot_title is None:
+            plot_title = data.core_level
+
         x = data.binding_energy
         y = data.corrected_intensity
 
@@ -247,6 +261,11 @@ class XPSBlock(DataBlock):
             )
         )
 
+        if "metadata" not in self.data or self.data["metadata"] is None:
+            self.data["metadata"] = {}
+
+        self.data["metadata"][data.core_level] = metadata
+
         return (
             fit_result,
             column(
@@ -260,7 +279,7 @@ class XPSBlock(DataBlock):
             ),
         )
 
-    def plot_XPS(self, filename: str | Path | None = None):
+    def plot_xps(self, filename: str | Path | None = None):
         """Creates an XPS plot with Shirley background and Voigt peak fitting.
 
         Parameters:
@@ -309,10 +328,7 @@ class XPSBlock(DataBlock):
             run_fit = False
 
         for file in file_infos:
-            plot_title = file["name"]
-            fit, subfigure = self._make_subfigure(
-                Path(file["location"]), plot_title=plot_title, run_fit=run_fit
-            )
+            fit, subfigure = self._make_subfigure(Path(file["location"]), run_fit=run_fit)
             if fit is not None:
                 if "fit_report" not in self.data:
                     self.data["fit_report"] = []
