@@ -6,8 +6,10 @@ from pathlib import Path
 import numpy as np
 from bokeh.layouts import column
 from bokeh.models import Button, CustomJS, Div, TextInput
+from bokeh.plotting import figure
 from pydatalab.blocks.base import DataBlock, event, generate_js_callback_single_float_parameter
 from pydatalab.bokeh_plots import DATALAB_BOKEH_THEME
+from vgd_reader import read_vgd
 
 from datalab_app_plugin_xps._version import __version__
 from datalab_app_plugin_xps.xps.utils import shirley_background
@@ -27,6 +29,9 @@ class XPSBlock(DataBlock):
         "peak_centers": "284, 286, 290",
         "run_fit": False,
     }
+
+    _prefers_async = True
+    multi_file = True
 
     @property
     def plot_functions(self):
@@ -60,51 +65,25 @@ class XPSBlock(DataBlock):
         """Enable peak fitting on next plot render (called by the Fit button)."""
         self.data["run_fit"] = True
 
-    def plot_XPS(self, filename: str | Path | None = None):
-        """Creates an XPS plot with Shirley background and Voigt peak fitting.
+    def _make_subfigure(self, filename: Path, plot_title=None):
+        background_subtraction = True
 
-        Parameters:
-            filename: Path to the .VGD file. If None, retrieves from the database
-                using the `file_id` stored in `self.data`.
-        """
-        import bokeh.embed
-        from bokeh.plotting import figure
-        from vgd_reader import read_vgd
-
-        file_info = None
-        if not filename:
-            try:
-                from pydatalab.file_utils import get_file_info_by_id
-            except ImportError:
-                raise RuntimeError(
-                    "The `datalab-server[server]` extra must be installed to use this block with a database."
-                )
-
-            if "file_id" not in self.data:
-                return
-
-            try:
-                file_info = get_file_info_by_id(self.data["file_id"], update_if_live=True)
-            except StopIteration:
-                return
-            if not file_info:
-                return
-            filename = Path(file_info["location"])
+        if "XPS_Survey" in filename.name:
+            background_subtraction = False
 
         data = read_vgd(filename)
         x = data.binding_energy
         y = data.corrected_intensity
 
-        plot_title = file_info["name"] if file_info else Path(filename).name
-
         # --- Shirley background ---
         bg = None
-        y_sub = y.copy()
-        try:
-            bg = shirley_background(x, y)
-            y_sub = y - bg
-        except Exception as exc:
-            warnings.warn(f"Shirley background failed: {exc}")
+        if background_subtraction:
+            y_sub = y.copy()
+            try:
+                bg = shirley_background(x, y)
+                y_sub = y - bg
+            except Exception as exc:
+                warnings.warn(f"Shirley background failed: {exc} for {filename}")
 
         # --- Parameters ---
         num_peaks = int(self.data.get("num_peaks", self.defaults["num_peaks"]))
@@ -142,7 +121,7 @@ class XPSBlock(DataBlock):
                     fit_result = model.fit(y_sub, params, x=x)
                     components = fit_result.eval_components(x=x)
             except Exception as exc:
-                warnings.warn(f"Voigt peak fitting failed: {exc}")
+                warnings.warn(f"Voigt peak fitting failed: {exc} for {filename}")
             finally:
                 # Reset so re-renders don't re-run the fit automatically
                 self.data["run_fit"] = False
@@ -268,17 +247,73 @@ class XPSBlock(DataBlock):
             )
         )
 
-        layout = column(
-            num_peaks_input,
-            peak_centers_input,
-            fit_button,
-            p,
-            num_peaks_hidden,
-            peak_centers_hidden,
-            sizing_mode="stretch_width",
+        return (
+            fit_result,
+            column(
+                num_peaks_input,
+                peak_centers_input,
+                fit_button,
+                p,
+                num_peaks_hidden,
+                peak_centers_hidden,
+                sizing_mode="stretch_width",
+            ),
         )
 
-        if fit_result is not None:
-            self.data["fit_report"] = fit_result.fit_report()
+    def plot_XPS(self, filename: str | Path | None = None):
+        """Creates an XPS plot with Shirley background and Voigt peak fitting.
+
+        Parameters:
+            filename: Path to the .VGD file. If None, retrieves from the database
+                using the `file_id` stored in `self.data`.
+        """
+
+        import bokeh.embed
+
+        if filename:
+            file_infos = [{"location": filename, "name": Path(filename).name}]
+
+        else:
+            try:
+                from pydatalab.file_utils import get_file_info_by_id
+            except ImportError:
+                raise RuntimeError(
+                    "The `datalab-server[server]` extra must be installed to use this block with a database."
+                )
+
+            if "file_ids" not in self.data:
+                return
+
+            file_ids = self.data.get("file_ids", [])
+            if not file_ids and "file_id" in self.data:
+                file_ids = [self.data["file_id"]]
+
+            file_infos = []
+
+            for fid in file_ids:
+                try:
+                    file_infos.append(get_file_info_by_id(fid, update_if_live=True))
+                except StopIteration:
+                    return
+
+            if not file_infos:
+                return
+
+        subfigures = []
+        for file in file_infos:
+            plot_title = file["name"]
+            fit, subfigure = self._make_subfigure(Path(file["location"]), plot_title=plot_title)
+            if fit is not None:
+                if "fit_report" not in self.data:
+                    self.data["fit_report"] = []
+
+                self.data["fit_report"].append(fit.fit_report())
+            if subfigure is not None:
+                subfigures.append(subfigure)
+
+        if len(subfigures) == 1:
+            layout = subfigures[0]
+        else:
+            layout = column(*subfigures)
 
         self.data["bokeh_plot_data"] = bokeh.embed.json_item(layout, theme=DATALAB_BOKEH_THEME)
