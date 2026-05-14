@@ -279,7 +279,7 @@ Uses the `vgd-reader` Python package: https://github.com/gkerherve/vgd_reader.
             ),
         )
 
-    def plot_xps(self, filename: str | Path | None = None):
+    def plot_xps(self, filenames: str | Path | list[str] | list[Path] | None = None):
         """Creates an XPS plot with Shirley background and Voigt peak fitting.
 
         Parameters:
@@ -289,8 +289,14 @@ Uses the `vgd-reader` Python package: https://github.com/gkerherve/vgd_reader.
 
         import bokeh.embed
 
-        if filename:
-            file_infos = [{"location": filename, "name": Path(filename).name}]
+        if filenames:
+            if not isinstance(filenames, list):
+                filenames = [filenames]  # type: ignore
+
+            file_infos = [
+                {"location": filename, "name": Path(filename).name}
+                for filename in filenames  # type: ignore
+            ]
 
         else:
             try:
