@@ -5,8 +5,8 @@ We recommend you use [`uv`](https://astral.sh/uv) for managing virtual environme
 Once you have `uv` installed, you can clone this repository and install the package in a fresh virtual environment with:
 
 ```
-git clone git@github.com:datalab-industries/datalab_app_plugin_digibat
-cd datalab_app_plugin_digibat
+git clone git@github.com:datalab-industries/datalab_app_plugin_xps
+cd datalab_app_plugin_xps
 uv sync --all-extras --dev
 ```
 

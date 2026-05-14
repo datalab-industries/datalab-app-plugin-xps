@@ -1,1 +1,1 @@
-"""Tests for datalab-app-plugin-digibat."""
+"""Tests for datalab-app-plugin-xps."""
