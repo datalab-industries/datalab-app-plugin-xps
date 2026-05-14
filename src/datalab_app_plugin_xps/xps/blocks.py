@@ -65,7 +65,7 @@ class XPSBlock(DataBlock):
         """Enable peak fitting on next plot render (called by the Fit button)."""
         self.data["run_fit"] = True
 
-    def _make_subfigure(self, filename: Path, plot_title=None):
+    def _make_subfigure(self, filename: Path, plot_title: str = None, run_fit: bool = False):
         background_subtraction = True
 
         if "XPS_Survey" in filename.name:
@@ -88,7 +88,6 @@ class XPSBlock(DataBlock):
         # --- Parameters ---
         num_peaks = int(self.data.get("num_peaks", self.defaults["num_peaks"]))
         peak_centers_str = self.data.get("peak_centers", self.defaults["peak_centers"])
-        run_fit = bool(self.data.get("run_fit", self.defaults["run_fit"]))
         try:
             centers = [float(p.strip()) for p in peak_centers_str.split(",") if p.strip()]
         except ValueError:
@@ -103,6 +102,7 @@ class XPSBlock(DataBlock):
         # --- Voigt peak fitting (only when explicitly requested) ---
         fit_result = None
         components = {}
+
         if run_fit:
             try:
                 from lmfit.models import VoigtModel
@@ -300,9 +300,19 @@ class XPSBlock(DataBlock):
                 return
 
         subfigures = []
+        run_fit = bool(self.data.get("run_fit", self.defaults["run_fit"]))
+
+        if run_fit and len(file_infos) > 1:
+            warnings.warn(
+                "Peak fitting is currently only supported for single files. Ignoring fit request."
+            )
+            run_fit = False
+
         for file in file_infos:
             plot_title = file["name"]
-            fit, subfigure = self._make_subfigure(Path(file["location"]), plot_title=plot_title)
+            fit, subfigure = self._make_subfigure(
+                Path(file["location"]), plot_title=plot_title, run_fit=run_fit
+            )
             if fit is not None:
                 if "fit_report" not in self.data:
                     self.data["fit_report"] = []
